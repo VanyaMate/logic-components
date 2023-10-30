@@ -2,7 +2,7 @@ export type EntitySubscribers<Events> = {
     [Event in keyof Events]?: EntityCallback<Events[Event]>[];
 }
 
-export type EntityCallback<Data> = (data: Data) => any;
+export type EntityCallback<DataType> = (data: DataType) => any;
 
 export type EntityDefaultEvents = {
     init: void;
