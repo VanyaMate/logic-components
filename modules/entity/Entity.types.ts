@@ -4,7 +4,9 @@ export type EntitySubscribers<Events> = {
 
 export type EntityCallback<Data> = (data: Data) => any;
 
-export type EntityEvents = {
+export type EntityDefaultEvents = {
     init: void;
     process: boolean;
 }
+
+export type EntityEvents<CustomEvents> = CustomEvents & EntityDefaultEvents;

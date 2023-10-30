@@ -1,9 +1,13 @@
 import { IEntity } from './Entity.interface';
-import { EntityCallback, EntityEvents, EntitySubscribers } from './Entity.types';
+import {
+    EntityCallback,
+    EntityEvents,
+    EntitySubscribers,
+} from './Entity.types';
 
 
-class Entity<CustomEvents extends EntityEvents> implements IEntity<CustomEvents> {
-    private readonly _subscribers: EntitySubscribers<CustomEvents> = {
+export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
+    private readonly _subscribers: EntitySubscribers<EntityEvents<Events>> = {
         init   : [],
         process: [],
     };
@@ -11,25 +15,25 @@ class Entity<CustomEvents extends EntityEvents> implements IEntity<CustomEvents>
     protected _initialized: boolean = false;
     protected _process: boolean     = false;
 
-    protected _execute<Event extends keyof CustomEvents> (event: Event): Promise<void> {
-        return Promise.all(this._subscribers[event]).then();
+    protected _execute<Event extends keyof EntityEvents<Events>> (event: Event, data: EntityEvents<Events>[Event]): Promise<void> {
+        return Promise.all(this._subscribers[event].map((callback) => callback(data))).then();
     }
 
-    protected constructor (subscribers?: EntitySubscribers<CustomEvents>) {
+    public constructor (subscribers?: EntitySubscribers<EntityEvents<Events>>) {
         this._subscribers = {
             ...this._subscribers,
             ...(subscribers ?? {}),
         };
     }
 
-    public subscribe<Event extends keyof CustomEvents> (event: Event, callback: EntityCallback<CustomEvents[Event]>): void {
+    public subscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
         if (!this._subscribers[event]) {
             this._subscribers[event] = [];
         }
         this._subscribers[event].push(callback);
     }
 
-    public unsubscribe<Event extends keyof CustomEvents> (event: Event, callback: EntityCallback<CustomEvents[Event]>): void {
+    public unsubscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
         if (this._subscribers[event]) {
             this._subscribers[event] = this._subscribers[event].filter((item) => item !== callback);
         }
