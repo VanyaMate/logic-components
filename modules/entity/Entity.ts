@@ -15,8 +15,18 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
     protected _initialized: boolean = false;
     protected _process: boolean     = false;
 
-    protected _execute<Event extends keyof EntityEvents<Events>> (event: Event, data: EntityEvents<Events>[Event]): Promise<void> {
+    protected _execute<Event extends keyof EntityEvents<Events>> (event: Event, data?: EntityEvents<Events>[Event]): Promise<void> {
         return Promise.all(this._subscribers[event].map((callback) => callback(data))).then();
+    }
+
+    protected _executeInit (data?: EntityEvents<Events>['init']): Promise<void> {
+        this._initialized = true;
+        return this._execute('init', data);
+    }
+
+    protected _executeProcess (data: EntityEvents<Events>['process']): Promise<void> {
+        this._process = data;
+        return this._execute('process', data);
     }
 
     public constructor (subscribers?: EntitySubscribers<EntityEvents<Events>>) {
@@ -27,6 +37,11 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
     }
 
     public subscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
+        if (event === 'init' && this._initialized) {
+            callback();
+            return;
+        }
+
         if (!this._subscribers[event]) {
             this._subscribers[event] = [];
         }
