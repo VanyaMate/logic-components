@@ -15,13 +15,16 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
     protected _initialized: boolean = false;
     protected _process: boolean     = false;
 
-    protected _execute<Event extends keyof EntityEvents<Events>> (event: Event, data?: EntityEvents<Events>[Event]): Promise<void> {
-        return Promise.all(this._subscribers[event].map((callback) => callback(data))).then();
+    protected _execute<Event extends keyof EntityEvents<Events>> (event: Event, data: EntityEvents<Events>[Event]): Promise<void> {
+        if (this._subscribers[event]) {
+            return Promise.all(this._subscribers[event]!.map((callback) => callback(data))).then();
+        }
+        return Promise.resolve();
     }
 
-    protected _executeInit (data?: EntityEvents<Events>['init']): Promise<void> {
+    protected _executeInit (): Promise<void> {
         this._initialized = true;
-        return this._execute('init', data);
+        return this._execute('init', null!);
     }
 
     protected _executeProcess (data: EntityEvents<Events>['process']): Promise<void> {
@@ -38,19 +41,19 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
 
     public subscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
         if (event === 'init' && this._initialized) {
-            callback();
+            (callback as EntityCallback<EntityEvents<Events>['init']>)(null!);
             return;
         }
 
         if (!this._subscribers[event]) {
             this._subscribers[event] = [];
         }
-        this._subscribers[event].push(callback);
+        this._subscribers[event]!.push(callback);
     }
 
     public unsubscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
         if (this._subscribers[event]) {
-            this._subscribers[event] = this._subscribers[event].filter((item) => item !== callback);
+            this._subscribers[event] = this._subscribers[event]!.filter((item) => item !== callback);
         }
     }
 }

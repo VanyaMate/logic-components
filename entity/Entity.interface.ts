@@ -1,4 +1,4 @@
-import { EntityCallback } from './Entity.types';
+import { EntityCallback, EntityDefaultEvents } from './Entity.types';
 
 
 export interface IEntity<Events> {
