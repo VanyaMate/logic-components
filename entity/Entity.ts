@@ -24,7 +24,7 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
 
     protected _executeInit (): Promise<void> {
         this._initialized = true;
-        return this._execute('init', null!);
+        return this._execute('init', null as EntityEvents<Events>['init']);
     }
 
     protected _executeProcess (data: EntityEvents<Events>['process']): Promise<void> {
@@ -41,7 +41,7 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
 
     public subscribe<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityCallback<EntityEvents<Events>[Event]>): void {
         if (event === 'init' && this._initialized) {
-            (callback as EntityCallback<EntityEvents<Events>['init']>)(null!);
+            (callback as EntityCallback<EntityEvents<Events>['init']>)(null as EntityEvents<Events>['init']);
             return;
         }
 
