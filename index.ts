@@ -30,3 +30,4 @@ checkbox.subscribe('toggle', onToggleHandler);
 
 
 checkbox.toggle(false).then((value) => console.log('toggled', value));
+checkbox.toggle();
