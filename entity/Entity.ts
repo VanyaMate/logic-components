@@ -28,6 +28,7 @@ export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
     }
 
     protected _executeProcess (data: EntityEvents<Events>['process']): Promise<void> {
+        if (this._process === data) return Promise.resolve();
         this._process = data;
         return this._execute('process', data);
     }
