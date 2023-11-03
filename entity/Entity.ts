@@ -6,7 +6,7 @@ import {
 } from './Entity.types';
 
 
-export default class Entity<Events> implements IEntity<EntityEvents<Events>> {
+export class Entity<Events> implements IEntity<EntityEvents<Events>> {
     private readonly _subscribers: EntitySubscribers<EntityEvents<Events>> = {
         init   : [],
         process: [],
