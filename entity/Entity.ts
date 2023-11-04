@@ -1,7 +1,7 @@
 import { IEntity } from './Entity.interface';
 import {
     EntityCallback,
-    EntityEvents,
+    EntityEvents, EntityExecuteCallback,
     EntitySubscribers,
 } from './Entity.types';
 
@@ -31,6 +31,14 @@ export class Entity<Events> implements IEntity<EntityEvents<Events>> {
         if (this._process === data) return Promise.resolve();
         this._process = data;
         return this._execute('process', data);
+    }
+
+    protected _executeWithProcess<Event extends keyof EntityEvents<Events>> (event: Event, callback: EntityExecuteCallback<EntityEvents<Events>[Event]>): Promise<void> {
+        return this
+            ._executeProcess(true as EntityEvents<Events>['process'])
+            .then(() => callback())
+            .then((data) => this._execute(event, data))
+            .then(() => this._executeProcess(false as EntityEvents<Events>['process']));
     }
 
     public constructor (subscribers?: EntitySubscribers<EntityEvents<Events>>) {

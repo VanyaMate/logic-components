@@ -3,6 +3,7 @@ export type EntitySubscribers<Events> = {
 }
 
 export type EntityCallback<DataType> = (data: DataType) => any;
+export type EntityExecuteCallback<DataType> = () => Promise<DataType>;
 
 export type EntityDefaultEvents = {
     init: null;
